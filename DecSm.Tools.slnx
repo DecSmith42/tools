@@ -1,0 +1,4 @@
+<Solution>
+  <Project Path="DecSm.Tools.ArtifactClean/DecSm.Tools.ArtifactClean.csproj" />
+  <Project Path="_atom/_atom.csproj" />
+</Solution>

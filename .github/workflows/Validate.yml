@@ -1,0 +1,53 @@
+name: Validate
+
+permissions: { }
+on:
+  workflow_dispatch:
+  pull_request:
+    branches:
+      - 'main'
+
+jobs:
+  
+  SetupBuildInfo:
+    runs-on: ubuntu-latest
+    outputs:
+      build-name: ${{ steps.SetupBuildInfo.outputs.build-name }}
+      build-id: ${{ steps.SetupBuildInfo.outputs.build-id }}
+      build-version: ${{ steps.SetupBuildInfo.outputs.build-version }}
+      build-timestamp: ${{ steps.SetupBuildInfo.outputs.build-timestamp }}
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      
+      - name: SetupBuildInfo
+        id: SetupBuildInfo
+        run: dotnet run --project _atom/_atom.csproj SetupBuildInfo --skip --headless
+  
+  Pack:
+    strategy:
+      matrix:
+        job-runs-on: [ windows-latest, ubuntu-latest, macos-latest ]
+    runs-on: ${{ matrix.job-runs-on }}
+    steps:
+      
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+      
+      - name: Pack
+        id: Pack
+        run: dotnet run --project _atom/_atom.csproj Pack --skip --headless
+        env:
+          job-runs-on: ${{ matrix.job-runs-on }}
+          build-slice: ${{ matrix.job-runs-on }}
