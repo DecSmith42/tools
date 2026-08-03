@@ -20,18 +20,6 @@ internal interface IBuild : IWorkflowBuildDefinition,
     IDocFxHelper,
     IWaitForCopilotReview
 {
-    [ParamDefinition("test-framework", "Test framework to use for unit tests")]
-    string TestFramework => GetParam(() => TestFramework, "net10.0");
-
-    [ParamDefinition("nuget-push-feed", "The Nuget feed to push to.")]
-    string NugetFeed => GetParam(() => NugetFeed, "https://api.nuget.org/v3/index.json");
-
-    [SecretDefinition("nuget-push-api-key", "The API key to use to push to Nuget.")]
-    string NugetApiKey => GetParam(() => NugetApiKey)!;
-
-    [ParamDefinition("prerelease-cleanup-below-version", "Unlist all prerelease packages below this stable version.")]
-    string PrereleaseCleanupBelowVersion => GetParam(() => PrereleaseCleanupBelowVersion)!;
-
     static readonly string[] PlatformNames =
     [
         WorkflowLabels.Github.RunsOn.Windows_Latest,
@@ -44,12 +32,17 @@ internal interface IBuild : IWorkflowBuildDefinition,
 
     static readonly string[] ToolsToPack = [Projects.Invex_Tools_ArtifactClean.Name];
 
-    IReadOnlyList<IBuildOption> IBuildDefinition.Options =>
-    [
-        BuildOptions.GitVersion.ProvideBuildId,
-        BuildOptions.GitVersion.ProvideBuildVersion,
-        BuildOptions.Steps.SetupDotnet.Dotnet100X(),
-    ];
+    [ParamDefinition("test-framework", "Test framework to use for unit tests")]
+    string TestFramework => GetParam(() => TestFramework, "net10.0");
+
+    [ParamDefinition("nuget-push-feed", "The Nuget feed to push to.")]
+    string NugetFeed => GetParam(() => NugetFeed, "https://api.nuget.org/v3/index.json");
+
+    [SecretDefinition("nuget-push-api-key", "The API key to use to push to Nuget.")]
+    string NugetApiKey => GetParam(() => NugetApiKey)!;
+
+    [ParamDefinition("prerelease-cleanup-below-version", "Unlist all prerelease packages below this stable version.")]
+    string PrereleaseCleanupBelowVersion => GetParam(() => PrereleaseCleanupBelowVersion)!;
 
     Target Pack =>
         t => t
@@ -192,6 +185,13 @@ internal interface IBuild : IWorkflowBuildDefinition,
             .DependsOn(nameof(SetupBuildInfo))
             .Executes(cancellationToken =>
                 PublishDocFxDocsToGithub(GithubToken, GeneratedDocsArtifactName, cancellationToken));
+
+    IReadOnlyList<IBuildOption> IBuildDefinition.Options =>
+    [
+        BuildOptions.GitVersion.ProvideBuildId,
+        BuildOptions.GitVersion.ProvideBuildVersion,
+        BuildOptions.Steps.SetupDotnet.Dotnet100X(),
+    ];
 
     IReadOnlyList<WorkflowDefinition> IWorkflowBuildDefinition.Workflows =>
     [

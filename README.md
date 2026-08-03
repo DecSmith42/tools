@@ -1,56 +1,92 @@
-﻿# Invex.Dotnet.Tools
+# Invex .NET Tools
 
-A collection of useful .NET tools for developers.
+A collection of small, focused .NET developer tools. The repository currently
+ships **ArtifactClean**, exposed as the `artclean` .NET global tool.
 
-## Tools
+## ArtifactClean
 
-### ArtifactClean (`artclean`)
+`artclean` cleans a .NET workspace by:
 
-`artclean` is a high-performance, recursive cleaning tool for .NET projects. It identifies and removes `bin` and `obj`
-directories across your workspace to reclaim disk space or ensure a clean state for your builds.
+1. Running `dotnet clean` in the selected directory.
+2. Recursively deleting directories named `bin` and `obj`.
+3. Running `dotnet restore` unless restoration is disabled.
 
-By default, it automatically executes `dotnet restore` after cleaning to bring your projects back to a ready-to-build
-state.
+It skips symbolic links, junctions, and other reparse points while traversing
+the directory tree. Inaccessible directories are skipped, while failures to
+delete a matching directory are reported. Deletion is permanent, so select the
+root path carefully.
 
-#### Key Features
+### Installation
 
-- **Fast Recursion**: Efficiently scans directories while ignoring reparse points.
-- **Deep Clean**: Removes both `bin` and `obj` folders.
-- **Auto-Restore**: Automatically runs `dotnet restore` to minimize downtime (can be disabled).
-- **Native AOT**: Built with Native AOT for minimal startup time and zero dependencies.
+Install the latest published version as a global tool:
 
-#### Installation
-
-```bash
+```shell
 dotnet tool install --global Invex.Tools.ArtifactClean
 ```
 
-#### Usage
+Update an existing installation:
 
-```bash
-# In the repo you want to clean
-artclean
-
-# Or specify arguments / options:
-artclean [path] [options]
+```shell
+dotnet tool update --global Invex.Tools.ArtifactClean
 ```
 
-**Arguments:**
+### Usage
 
-- `path`: The root directory to begin the recursive search. [Default: current directory]
+Clean the current directory:
 
-**Options:**
+```shell
+artclean
+```
 
-- `-n, --no-restore`: Skips the `dotnet restore` operation after cleaning.
-- `-v, --verbose`: Enables verbose output during the cleaning process.
+Clean a specific workspace:
 
----
+```shell
+artclean --path "path/to/workspace"
+```
 
-## Repository Structure
+Show each deleted directory and the output from the `dotnet` commands:
 
-- `Invex.Tools.ArtifactClean`: Source code for the `artclean` tool.
-- `_atom`: The **Atom** build system project used for CI/CD and automation.
+```shell
+artclean --verbose
+```
+
+Skip the restore step after cleaning:
+
+```shell
+artclean --no-restore
+```
+
+The complete command syntax is:
+
+```text
+artclean [options]
+  -p, --path <directory>  Root directory to clean (default: current directory)
+  -n, --no-restore        Do not run dotnet restore after cleaning
+  -v, --verbose           Show detailed cleanup and dotnet command output
+```
+
+`dotnet clean` and `dotnet restore` are run with the selected directory as
+their working directory. The tool requires the `dotnet` command to be
+available on `PATH`.
+
+### Supported platforms
+
+The tool targets .NET 8 and .NET 10. Published .NET 10 packages include
+Native AOT assets for:
+
+- Windows x64 and ARM64
+- Linux x64 and ARM64
+- macOS x64 and ARM64
+
+## Repository layout
+
+| Path | Purpose |
+| --- | --- |
+| `src/Invex.Tools.ArtifactClean` | Source for the `artclean` tool |
+| `_atom` | Atom build definition used to generate CI and release workflows |
+| `docs` | DocFX source for the project documentation |
+| `Invex.Tools.slnx` | Repository solution |
 
 ## License
 
-This project is licensed under the [MIT License](LICENSE.txt).
+This project is available under the [MIT License](LICENSE.txt).

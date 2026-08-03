@@ -5,7 +5,9 @@ description: Clean .NET build artifacts with the artclean command.
 
 # ArtifactClean (`artclean`)
 
-`artclean` recursively removes `bin` and `obj` directories from a .NET workspace. By default, it restores the workspace afterward so it is ready for the next build.
+`artclean` runs `dotnet clean`, recursively removes `bin` and `obj` directories
+from a .NET workspace, and runs `dotnet restore` afterward by default. It skips
+symbolic links, junctions, and other reparse points while traversing.
 
 ## Installation
 
@@ -24,7 +26,7 @@ artclean
 Provide a root path to clean a different directory:
 
 ```bash
-artclean path\to\workspace
+artclean --path "path/to/workspace"
 ```
 
 ## Options
